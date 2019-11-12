@@ -75,9 +75,6 @@ class Background extends Component {
 
     init() {
 
-        this.SIDPlayer = new jsSID( 16384, 0.0005 );
-        this.SIDPlayer.loadInit( '/SIDFiles/Double_Dragon.sid', 0 );
-
         this.canvas = document.createElement( 'canvas' );
         this.canvasContext = this.canvas.getContext( '2d' );
 
@@ -151,6 +148,14 @@ class Background extends Component {
         this.handleMouse = ( e ) => {
 
             if ( !this.mouseFocus ) { this.mouseFocus = true; }
+
+            if ( this.SIDPlayer === null ) {
+
+                this.SIDPlayer = new jsSID( 16384, 0.0005 );
+                this.SIDPlayer.loadInit( '/SIDFiles/Double_Dragon.sid', 0 );
+
+            }
+
             this.mouseTargetX = ( ( e.clientX / this.mount.clientWidth ) - 0.5 ) * 2.0;
             this.mouseTargetY = ( ( e.clientY / this.mount.clientHeight ) - 0.5 ) * 2.0;
 
@@ -214,30 +219,34 @@ class Background extends Component {
             this.canvasContext.strokeStyle = '#00FF00';
             this.canvasContext.beginPath();
 
-            let sliceWidth = this.canvas.width * 0.995 / this.SIDPlayer.bufferLength;
-            let x = 0;
+            if ( this.SIDPlayer !== null ) {
 
-            for( let i = 0; i < this.SIDPlayer.bufferLength; i++ ) {
-
-                let v = this.SIDPlayer.audioDataArray[ i ] / 128.0;
-                let y = v * halfHeight;
-
-                if( i === 0 ) {
-
-                    this.canvasContext.moveTo( x, y );
-
-                } else {
-
-                    this.canvasContext.lineTo( x, y );
-
+                let sliceWidth = this.canvas.width * 0.995 / this.SIDPlayer.bufferLength;
+                let x = 0;
+    
+                for( let i = 0; i < this.SIDPlayer.bufferLength; i++ ) {
+    
+                    let v = this.SIDPlayer.audioDataArray[ i ] / 128.0;
+                    let y = v * halfHeight;
+    
+                    if( i === 0 ) {
+    
+                        this.canvasContext.moveTo( x, y );
+    
+                    } else {
+    
+                        this.canvasContext.lineTo( x, y );
+    
+                    }
+    
+                    x += sliceWidth;
+    
                 }
-
-                x += sliceWidth;
+    
+                this.canvasContext.lineTo( this.canvas.width, halfHeight );
+                this.canvasContext.stroke();
 
             }
-
-            this.canvasContext.lineTo( this.canvas.width, halfHeight );
-            this.canvasContext.stroke();
 
         };
 
@@ -263,8 +272,12 @@ class Background extends Component {
 
                 if ( !this.state.playing ) {
 
-                    this.setState( { playing: !this.state.playing } );
-                    this.SIDPlayer.playContinue();
+                    if ( this.SIDPlayer !== null ) {
+
+                        this.setState( { playing: !this.state.playing } );
+                        this.SIDPlayer.playContinue();
+
+                    }
 
                 }
 
@@ -281,7 +294,12 @@ class Background extends Component {
             this.uniforms.date.value = this.getDate();
             this.uniforms.mouse.value = { x: this.mouseX, y: this.mouseY };
             this.uniforms.iChannel0.value = this.canvasTexture;
-            this.SIDPlayer.analyser.getByteTimeDomainData( this.SIDPlayer.audioDataArray );
+
+            if ( this.SIDPlayer !== null ) {
+
+                this.SIDPlayer.analyser.getByteTimeDomainData( this.SIDPlayer.audioDataArray );
+
+            }
 
         };
 

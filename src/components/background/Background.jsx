@@ -112,6 +112,27 @@ class Background extends Component {
 
     }
 
+    initializeSID = () => {
+
+        if ( this.SIDPlayer === null ) {
+
+            this.SIDPlayer = new jsSID( 16384, 0.0005 );
+            this.SIDPlayer.loadInit( '/SIDFiles/Double_Dragon.sid', 0 );
+
+            let playButton = document.getElementById( 'play_button');
+
+            if ( playButton ) {
+
+                playButton.style.opacity = 0.0;
+                playButton.style.zIndex = '-100';
+
+            }
+
+
+        }
+
+    }
+
     componentDidMount() {
 
         this.init();
@@ -148,13 +169,6 @@ class Background extends Component {
         this.handleMouse = ( e ) => {
 
             if ( !this.mouseFocus ) { this.mouseFocus = true; }
-
-            if ( this.SIDPlayer === null ) {
-
-                this.SIDPlayer = new jsSID( 16384, 0.0005 );
-                this.SIDPlayer.loadInit( '/SIDFiles/Double_Dragon.sid', 0 );
-
-            }
 
             this.mouseTargetX = ( ( e.clientX / this.mount.clientWidth ) - 0.5 ) * 2.0;
             this.mouseTargetY = ( ( e.clientY / this.mount.clientHeight ) - 0.5 ) * 2.0;
@@ -482,12 +496,17 @@ class Background extends Component {
     render() {
 
         return (
-
-            <div className="background-canvas" ref = { mount => { this.mount = mount; } }>
-                <div className="player-wrapper">
+            <>
+                <div className="background-canvas" ref = { mount => { this.mount = mount; } }>
+                    <div className="player-wrapper">
+                    </div>
                 </div>
-            </div>
-
+                <div
+                    className="play-button"
+                    id="play_button"
+                    onClick={this.initializeSID}
+                >PLAY</div>
+            </>
         );
 
     }

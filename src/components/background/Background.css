@@ -6,11 +6,34 @@
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: -42;
+    z-index: -1;
     /* background-color: #303030; */
     background: #303030;
     background: -moz-radial-gradient(center, ellipse cover, #303030 0%, #121212 100%);
     background: -webkit-radial-gradient(center, ellipse cover, #303030 0%,#121212 100%);
     background: radial-gradient(ellipse at center, #303030 0%,#121212 100%);
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#303030', endColorstr='#121212',GradientType=1 );
+}
+
+.play-button {
+    font-size: 30px;
+    font-weight: 900;
+    position: fixed;
+    padding: 7px 21px;
+    border: 1px solid #FFFFFF;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.5);
+    opacity: 1;
+    cursor: default !important;
+    transition: all 0.5s ease-in-out;
+    color: #FFFFFF;
+    z-index: 100 !important;
+}
+
+.play-button:hover {
+    background-color: #00FF00;
+    color: #000000;
 }

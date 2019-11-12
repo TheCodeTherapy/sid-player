@@ -1,6 +1,6 @@
 .landing-page {
-    min-width: 100vw;
-    min-height: calc(100vh - 80px);
+    /* min-width: 100vw;
+    min-height: calc(100vh - 80px); */
     padding: 0;
     border: 0;
 }

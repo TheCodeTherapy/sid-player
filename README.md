@@ -8,7 +8,9 @@ In a few days a dropdown list with all server-served sid files will be available
 
 New audio-reactive background shaders and waveform visualizer's styles will be also available and seamlessly browsable ( like the background shaders you can see at my personal website [https://mgz.me](https://mgz.me) ).
 
-**You can view the final result / production build at [https://sid.mgz.me](https://sid.mgz.me)**
+**THIS PROJECT IS A WIP. Please expect it to have a lot of room for improvements for now.**
+
+You can view the final result / production build at [https://sid.mgz.me](https://sid.mgz.me)
 
 *If you are a composer, and you're interested on having your songs exposed on this project, please get in touch through my email `me@mgz.me` and send me your .sid files.*
 

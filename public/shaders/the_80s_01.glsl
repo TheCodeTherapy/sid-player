@@ -34,6 +34,12 @@ vec2 rotate ( in vec2 uv, in float a ) {
     return vec2( uv.x * cos( a ) - uv.y * sin( a ), uv.x * sin( a ) + uv.y * cos( a ) );
 }
 
+float maxAbs ( in vec2 p, in float frac ) {
+    vec2 absp = abs( rotate( p, time * 0.5 ) );
+    float maxp = max( absp.x, rotate( absp, frac ).y );
+    return sin( ( maxp ) * oscillator - time * 10.0 ) * 0.5 + 0.5;
+}
+
 float hash ( in vec2 uv ) {
     return fract( sin( dot( uv.xy, hashV ) ) * hashF );
 }
@@ -83,52 +89,6 @@ mat2 rot ( in float a ) {
     float ca = cos( a );
     float sa = sin( a );
 	return mat2( ca, sa, -sa, ca );
-}
-
-float maxAbs ( in vec2 p, in float frac ) {
-    vec2 absp = abs( rotate( p, time * 0.5 ) );
-    float maxp = max( absp.x, rotate( absp, frac ).y );
-    return sin( ( maxp ) * oscillator - time * 10.0 ) * 0.5 + 0.5;
-}
-
-float minAbs ( in vec2 p, in float frac ) {
-    vec2 absp = abs( rotate( p, time * -0.35 ) );
-    float minp = min( absp.x, absp.y );
-    minp *= min( rotate( absp, -time ).x, rotate( absp, time ).y );
-    return sin( ( minp ) * oscillator - time * 10.0 ) * 0.5 + 0.5;
-}
-
-float maxPlusMinAbs ( in vec2 p ) {
-    vec2 absp = abs( p );
-    float maxp = max( absp.x, absp.y );
-    float minp = min( absp.x, absp.y );
-    return sin( ( maxp + minp ) * oscillator - time * 10.0 ) * 0.5 + 0.5;
-}
-
-float maxTimesMin ( in vec2 p ) {
-    vec2 absp = abs( p );
-    float maxp = max( absp.x, absp.y );
-    float minp = min( absp.x, absp.y );
-    return sin( pow( maxp * minp, ssp ) * oscillator - time * 10.0 ) * 0.5 + 0.5;
-}
-
-float minDByMax ( in vec2 p ) {
-    vec2 absp = abs( p );
-    float maxp = max( absp.x, absp.y );
-    float minp = min( absp.x, absp.y );
-    return sin( 0.5 * ( minp / maxp ) * oscillator - time * 10.0 ) * 0.5 + 0.5;
-}
-
-float powMinMax ( in vec2 p ) {
-    vec2 absp = abs( p );
-    float maxp = max( absp.x, absp.y );
-    float minp = min( absp.x, absp.y );
-    return sin( pow( minp, maxp ) * oscillator - time * 10.0 ) * 0.5 + 0.5;
-}
-
-float atanStar ( in vec2 p ) {
-    float pAtan = atan( p.y, p.x );
-    return sin( pAtan * 12.0 + time * 7.45 ) * 0.5 + 0.5;
 }
 
 float spiral ( in vec2 p ) {
@@ -575,43 +535,37 @@ float traceCube() {
 }
 
 float getEffect ( in int fx, in vec2 uv, in float frac ) {
-    float effects = 35.0;
+    float effects = 25.0;
     int idx = int( effects ) - 1;
     fx = int( fract( float( fx ) * 1.61456 ) * effects );
     int temp = fx / idx;
     fx -= temp * idx;
     float value = 0.0;
          if ( fx ==  0 ) value = waves( uv, frac );
-    else if ( fx ==  1 ) value = minAbs( uv, frac );
-    else if ( fx ==  2 ) value = maxPlusMinAbs( uv );
-    else if ( fx ==  3 ) value = maxTimesMin( uv );
-    else if ( fx ==  4 ) value = minDByMax( uv );
-    else if ( fx ==  5 ) value = powMinMax( uv );
-    else if ( fx ==  6 ) value = atanStar( uv );
-    else if ( fx ==  7 ) value = grid( uv );
-    else if ( fx ==  8 ) value = curvedTruchet( uv );
-    else if ( fx ==  9 ) value = pacman( uv, frac );
-    else if ( fx == 10 ) value = clock( uv );
-    else if ( fx == 11 ) value = truchet( uv );
-    else if ( fx == 12 ) value = maxAbs( uv, frac );
-    else if ( fx == 13 ) value = plasma( uv );
-    else if ( fx == 14 ) value = eye( uv, frac );
-    else if ( fx == 15 ) value = stars( uv );
-    else if ( fx == 16 ) value = squares( uv );
-    else if ( fx == 17 ) value = capsule( uv );
-    else if ( fx == 18 ) value = spiral( uv );
-    else if ( fx == 19 ) value = pong( uv );
-    else if ( fx == 20 ) value = corridor( uv );
-    else if ( fx == 21 ) value = rings( uv );
-    else if ( fx == 22 ) value = wave( uv );
-    else if ( fx == 23 ) value = flippingSquares( uv );
-    else if ( fx == 24 ) value = strangeCell( uv );
-    else if ( fx == 25 ) value = weirdCircle();
-    else if ( fx == 26 ) value = spiralWaves();
-    else if ( fx == 27 ) value = diamondWaves( uv );
-    else if ( fx == 28 ) value = sun();
-    else if ( fx == 29 ) value = checkers();
-    else if ( fx == 30 ) value = traceCube();
+    else if ( fx ==  1 ) value = grid( uv );
+    else if ( fx ==  2 ) value = curvedTruchet( uv );
+    else if ( fx ==  3 ) value = pacman( uv, frac );
+    else if ( fx ==  4 ) value = clock( uv );
+    else if ( fx ==  5 ) value = truchet( uv );
+    else if ( fx ==  6 ) value = maxAbs( uv, frac );
+    else if ( fx ==  7 ) value = plasma( uv );
+    else if ( fx ==  8 ) value = eye( uv, frac );
+    else if ( fx ==  9 ) value = stars( uv );
+    else if ( fx == 10 ) value = squares( uv );
+    else if ( fx == 11 ) value = capsule( uv );
+    else if ( fx == 12 ) value = spiral( uv );
+    else if ( fx == 13 ) value = pong( uv );
+    else if ( fx == 14 ) value = corridor( uv );
+    else if ( fx == 15 ) value = rings( uv );
+    else if ( fx == 16 ) value = wave( uv );
+    else if ( fx == 17 ) value = flippingSquares( uv );
+    else if ( fx == 18 ) value = strangeCell( uv );
+    else if ( fx == 19 ) value = weirdCircle();
+    else if ( fx == 20 ) value = spiralWaves();
+    else if ( fx == 21 ) value = diamondWaves( uv );
+    else if ( fx == 22 ) value = sun();
+    else if ( fx == 23 ) value = checkers();
+    else if ( fx == 24 ) value = traceCube();
     else                 value = plasma( uv );
    	return value;
 }

@@ -1,0 +1,36 @@
+.contact-text {
+    text-align: left;
+}
+
+.contact-links {
+    line-height: 50px;
+    font-size: 21px;
+    text-align: left;
+    list-style: none;
+}
+
+.contact-links i {
+    font-size: 21px;
+    padding: 12px 21px;
+}
+
+.contact-links a {
+    text-decoration: none;
+    display: inline-block;
+    width: 100%;
+    border-top: 1px solid rgba(70, 70, 70, 0.50);
+    border-left: 1px solid rgba(70, 70, 70, 0.50);
+    color: #FFFFFF;
+    -webkit-transition: all .3s ease-in-out;
+    -moz-transition: all .3s ease-in-out;
+    -o-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+    background-color: rgba(0, 0, 0, 0.0);
+}
+
+.contact-links a:hover {
+    color: #30FF30;
+    border-top: 1px solid rgba(48, 255, 48, 0.91);
+    border-left: 1px solid rgba(48, 255, 48, 0.91);
+    background-image: linear-gradient(to right, rgba(48, 255, 48, 0.21), rgba(0, 0, 0, 0));
+}

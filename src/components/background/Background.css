@@ -1,0 +1,16 @@
+.background-canvas {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -42;
+    /* background-color: #303030; */
+    background: #303030;
+    background: -moz-radial-gradient(center, ellipse cover, #303030 0%, #121212 100%);
+    background: -webkit-radial-gradient(center, ellipse cover, #303030 0%,#121212 100%);
+    background: radial-gradient(ellipse at center, #303030 0%,#121212 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#303030', endColorstr='#121212',GradientType=1 );
+}

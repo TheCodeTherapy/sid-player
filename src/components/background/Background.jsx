@@ -337,13 +337,13 @@ class Background extends Component {
 
             this.postProcessing.setBadVHS( {
 
-                enabled: true,
+                enabled: false,
                 screencurve: 'false',
                 resolution: new Vector2( this.width, this.height ),
                 h_distort: 0.000000001,
                 v_distort: 0.000000001,
-                g_amount: 0.02,
-                time: this.timer,
+                g_amount: 0.06,
+                time: this.timer * 2.0,
                 mix_amount: 1.0,
                 scanlines: 'false',
 

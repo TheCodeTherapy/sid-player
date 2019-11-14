@@ -15,29 +15,8 @@ const float ssp = 0.666666666667;
 const vec2  hashV = vec2( 12.9898, 78.233 );
 const float hashF = 43758.5453123;
 
-float oscillator = 60.0;
-
-mat2 matRot( in float a ) {
+mat2 rot( in float a ) {
 	return mat2( cos ( a ), -sin( a ), sin( a ), cos( a ) );
-}
-
-float smin ( in float a, in float b, in float k ) {
-    float h = clamp( 0.5 + 0.5 * ( b - a * a ) / k, 0.0, 1.0 );
-    return mix( b, a, h ) - k * h * ( 0.05 - h );
-}
-
-float osc ( in float s, in float e, in float t, in float ts ) {
-    return ( e - s ) / 2.0 + s + sin( t * ts ) * ( e - s ) * 0.5;
-}
-
-vec2 rotate ( in vec2 uv, in float a ) {
-    return vec2( uv.x * cos( a ) - uv.y * sin( a ), uv.x * sin( a ) + uv.y * cos( a ) );
-}
-
-float maxAbs ( in vec2 p, in float frac ) {
-    vec2 absp = abs( rotate( p, time * 0.5 ) );
-    float maxp = max( absp.x, rotate( absp, frac ).y );
-    return sin( ( maxp ) * oscillator - time * 10.0 ) * 0.5 + 0.5;
 }
 
 float hash ( in vec2 uv ) {
@@ -50,45 +29,12 @@ float noise ( in vec2 uv ) {
 	return mix( mix( hash( b ), hash( b + O.yx ), 0.5 ), mix( hash( b + O ), hash( b + O.yy ), 0.5 ), 0.5 );
 }
 
-float fbm ( in vec2 uv, in float timeScale ) {
-    float a = osc( 0.7, 1.0, time, timeScale );
-    float total = 0.0;
-    for ( int i = 0; i < 5; i++ ) {
-        total += hash( uv ) * a;
-        uv += uv * 1.7;
-        a *= 0.47;
-    }
-    return total;
-}
-
-vec2 curve ( in vec2 uv ) {
-	uv = ( uv - 0.5 ) * 2.0;
-	uv *= 1.1;
-	uv.x *= 1.0 + pow( ( abs( uv.y ) / 5.0 ), 2.0 );
-	uv.y *= 1.0 + pow( ( abs( uv.x ) / 4.0 ), 2.0 );
-	uv  = ( uv / 2.0 ) + 0.5;
-	uv =  uv * 0.92 + 0.04;
-	return uv;
-}
-
-vec4 vignette ( in vec2 uv, in vec4 col, in float inten, in bool rev ) {
-	uv *= 1.0 - uv.yx;
-	float vig = pow( abs( uv.x * uv.y * 15.0 ), 0.25 + inten );
-	return rev ? col /= vec4( vig ) : col *= vec4( vig );
-}
-
 vec2 truchetPattern ( in vec2 uv, in float index ) {
     index = fract( ( ( index - 0.5 ) * 2.0 ) );
     if ( index > 0.75 ) { uv = vec2( 1.0 ) - uv; }
     else if ( index > 0.50 ) { uv = vec2( 1.0 - uv.x, uv.y ); }
     else if ( index > 0.25 ) { uv = 1.0 - vec2( 1.0 - uv.x, uv.y ); }
     return uv;
-}
-
-mat2 rot ( in float a ) {
-    float ca = cos( a );
-    float sa = sin( a );
-	return mat2( ca, sa, -sa, ca );
 }
 
 float spiral ( in vec2 p ) {
@@ -111,7 +57,7 @@ float waves ( in vec2 p, in float frac ) {
 
 float truchet ( in vec2 p ) {
     p *= 16.0;
-    p = rotate( p, time * 0.3 );
+    p *= rot( time * 0.3 );
     p.x += time * 0.25;
 	vec2 ipos = floor( p );
     vec2 fpos = fract( p );
@@ -122,7 +68,7 @@ float truchet ( in vec2 p ) {
 
 float curvedTruchet ( in vec2 p ) {
     p *= 8.0;
-    p = rotate( p, time * 0.2);
+    p *= rot( time * 0.2 );
 	vec2 ipos = floor( p );
     vec2 fpos = fract( p );
     vec2 tile = truchetPattern( fpos, hash( ipos ) );
@@ -353,7 +299,7 @@ float clock ( in vec2 p ) {
     float value = 0.0, pointer = 0.0, lp = length( p );
     value += smoothstep( 0.7, 0.8, lp ) * ( 1.0 - smoothstep( 0.8, 0.9, lp ) );
     vec2 push = p;
-    p *= rot( -floor( mod( date.w, 60.0 ) ) / 60.0 * 2.0 * PI );
+    p *= rot( floor( mod( date.w, 60.0 ) ) / 60.0 * 2.0 * PI );
     if ( p.x < 0.02 && p.x > -0.02 && p.y > -0.05 && p.y < 0.7 ) pointer = 1.0;
     value += pointer, p = push, p.y += 0.2, p.x -= 0.03;
     float minutes = mod( date.w / 60.0, 60.0 );
@@ -507,8 +453,8 @@ float checkers() {
 }
 
 float map( in vec3 p ) {
-	p.xz *= matRot( time * PI / 5.5 );
-	p.xy *= matRot( time * PI / 5.5 );
+	p.xz *= rot( time * PI / 5.5 );
+	p.xy *= rot( time * PI / 5.5 );
 	vec3 q = abs( p );
 	float c = max( q.x, max( q.y, q.z ) ) - 0.5;
 	return c;
@@ -535,7 +481,7 @@ float traceCube() {
 }
 
 float getEffect ( in int fx, in vec2 uv, in float frac ) {
-    float effects = 25.0;
+    float effects = 26.0;
     int idx = int( effects ) - 1;
     fx = int( fract( float( fx ) * 1.61456 ) * effects );
     int temp = fx / idx;
@@ -547,25 +493,24 @@ float getEffect ( in int fx, in vec2 uv, in float frac ) {
     else if ( fx ==  3 ) value = pacman( uv, frac );
     else if ( fx ==  4 ) value = clock( uv );
     else if ( fx ==  5 ) value = truchet( uv );
-    else if ( fx ==  6 ) value = maxAbs( uv, frac );
-    else if ( fx ==  7 ) value = plasma( uv );
-    else if ( fx ==  8 ) value = eye( uv, frac );
-    else if ( fx ==  9 ) value = stars( uv );
-    else if ( fx == 10 ) value = squares( uv );
-    else if ( fx == 11 ) value = capsule( uv );
-    else if ( fx == 12 ) value = spiral( uv );
-    else if ( fx == 13 ) value = pong( uv );
-    else if ( fx == 14 ) value = corridor( uv );
-    else if ( fx == 15 ) value = rings( uv );
-    else if ( fx == 16 ) value = wave( uv );
-    else if ( fx == 17 ) value = flippingSquares( uv );
-    else if ( fx == 18 ) value = strangeCell( uv );
-    else if ( fx == 19 ) value = weirdCircle();
-    else if ( fx == 20 ) value = spiralWaves();
-    else if ( fx == 21 ) value = diamondWaves( uv );
-    else if ( fx == 22 ) value = sun();
-    else if ( fx == 23 ) value = checkers();
-    else if ( fx == 24 ) value = traceCube();
+    else if ( fx ==  6 ) value = plasma( uv );
+    else if ( fx ==  7 ) value = eye( uv, frac );
+    else if ( fx ==  8 ) value = capsule( uv );
+    else if ( fx ==  9 ) value = squares( uv );
+    else if ( fx == 10 ) value = stars( uv );
+    else if ( fx == 11 ) value = spiral( uv );
+    else if ( fx == 12 ) value = pong( uv );
+    else if ( fx == 13 ) value = corridor( uv );
+    else if ( fx == 14 ) value = rings( uv );
+    else if ( fx == 15 ) value = wave( uv );
+    else if ( fx == 16 ) value = flippingSquares( uv );
+    else if ( fx == 17 ) value = strangeCell( uv );
+    else if ( fx == 18 ) value = weirdCircle();
+    else if ( fx == 19 ) value = spiralWaves();
+    else if ( fx == 20 ) value = diamondWaves( uv );
+    else if ( fx == 21 ) value = sun();
+    else if ( fx == 22 ) value = checkers();
+    else if ( fx == 23 ) value = traceCube();
     else                 value = plasma( uv );
    	return value;
 }
@@ -600,29 +545,27 @@ float dither ( in vec2 frag, in float ledSize, in float cellSize, in float eLeng
 
 
 float getDist ( in int fx, in vec2 p, in float frac ) {
+    vec2 wp = vec2( p.x + sin( 4.0 * p.y + time * 2.0 ) * 0.05, p.y + cos( 2.0 * p.x + time ) * 0.05 );
     float effects = 13.0;
     int idx = int( effects ) - 1;
     fx = int( fract( float( fx ) * 1.61456 ) * effects );
     int temp = fx / idx;
     fx -= temp * idx;
-    vec2 absp = abs( p );
-    float mi = min( absp.x, absp.y );
-    float ma = absp.x + absp.y - mi;
-    float crossv = max( 0.4 - mi, 0.0 );
-    float square = max( 0.8 - ma, 0.0 );
     float value = 0.0;
-         if ( fx ==  0 ) value = 0.5 - ( ma - mi );
-    else if ( fx ==  1 ) value = square;
-    else if ( fx ==  2 ) value = 0.6 - ( ma - ( mi + sin( p.y + time ) * 0.2 ) );
-    else if ( fx ==  3 ) value = max( 0.5 - ( ma - 0.2 - ( mi * 0.25 ) ), 0.0) * 1.5;
-    else if ( fx ==  4 ) value = max( 0.9 - ( mi + ma ), 0.0 );
-    else if ( fx ==  5 ) value = -( crossv - square );
-    else if ( fx ==  6 ) value = min(square * 2.0, crossv * 2.0);
-    else if ( fx ==  7 ) value = max( 0.7 - ( ma - 0.5 * mi *  ma * 1.5 ), 0.0 ) * 1.0;
-    else if ( fx ==  8 ) value = max( 0.9 - ( ma - 0.5 * mi * -ma * 1.5 ), 0.0 ) * 1.0;
-    else if ( fx ==  9 ) value = 0.8 - length( vec2( absp.x * 0.8, absp.y * 1.2 ) );
-    else if ( fx == 10 ) value = 1.0 - length( absp * 1.2 );
-    else                 value = 0.8 - length( vec2( absp.x * 0.8, absp.y * 1.2 ) ) * ma;
+         if ( fx ==  0 ) { value = 0.75 - ( ( abs( p ).x + abs( p ).y - ( min( abs( p ).x, abs( p ).y ) ) ) - ( min( abs( p ).x, abs( p ).y ) ) ); }
+    else if ( fx ==  1 ) { value = ( max( 0.8 - ( ( abs( p ).x + sin( abs( p ).y * 1.25 + time ) * 0.1 )  + ( abs( p ).y ) - min( abs( p ).x, abs( p ).y ) ), 0.0 ) ) - 0.1 ; }
+    else if ( fx ==  2 ) { value = 0.6 - ( ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) - ( ( min( abs( p ).x, abs( p ).y ) ) + sin( abs( abs( p ).y ) + time ) * 0.2 ) ); }
+    else if ( fx ==  3 ) { value = max( 0.5 - ( ( ( abs( p * rot( time ) ).x ) + abs( p * rot( time ) ).y - min( abs( p * rot( time ) ).x, abs( p * rot( time ) ).y ) ) - 0.2 - ( ( min( abs( p ).x, abs( p ).y ) ) * 0.25 ) ), 0.0) * 1.5; }
+    else if ( fx ==  4 ) { value = max( 0.9 - ( ( min( abs( p ).x, abs( p ).y ) ) + ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) ), 0.0 ); }
+    else if ( fx ==  5 ) { value = -( ( max( 0.4 - ( min( abs( p ).x, abs( p ).y ) ), 0.0 ) ) - ( max( 0.8 - ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ), 0.0 ) ) ); }
+    else if ( fx ==  6 ) { value = -( ( max( 0.25 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) - ( max( 0.8 - ( abs( wp ).x + abs( wp ).y - min( abs( p ).x, abs( p ).y ) ), 0.0 ) ) ); }
+    else if ( fx ==  7 ) { value = min(( max( 0.8 - ( abs( wp ).x + abs( p ).y - min( abs( wp ).x, abs( p ).y ) ), 0.0 ) ) * 2.0, ( max( 0.5 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) * 2.0); }
+    else if ( fx ==  8 ) { value = max( 0.7 - ( ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) - 0.5 * ( min( abs( p ).x, abs( p ).y ) ) *  ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) * 1.5 ), 0.0 ) * 1.0; }
+    else if ( fx ==  9 ) { value = max( 0.9 - ( ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) - 0.5 * ( min( abs( p ).x, abs( p ).y ) ) * -( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) * 1.5 ), 0.0 ) * 1.0; }
+    else if ( fx == 10 ) { value = 0.8 - length( vec2( abs( p ).x * 0.8, abs( p ).y * 1.2 ) ); }
+    else if ( fx == 11 ) { value = 1.0 - length( abs( p ) * 1.2 ); }
+    else if ( fx == 12 ) { value = 0.7 - length( ( vec2( p.x * cos( 0.2 * p.y + time * 0.5 ), p.y * sin( p.y + time * 0.5 ) * 0.125 ) ) * 1.2 ); }
+    else                 { value = 0.8 - length( vec2( abs( p ).x * 0.8, abs( p ).y * 1.2 ) ) * ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ); }
     return value;
 }
 
@@ -635,39 +578,34 @@ float transitionDist ( in vec2 uv, in float eLength ) {
     return mix( valueB, valueMix, smoothstep( 0.8, 1.0, frac ) );
 }
 
-vec3 getBackground ( in vec2 uv, in float dither ) {
-    vec4 t = texture2D( iChannel0, uv );
-    vec3 d = vec3( dither * 0.005, dither * 0.01, dither * 0.005 ) * 0.02;
-    return sqrt( t.rgb ) + d;
-}
-
 void main ( void ) {
     const float ledSize = 2.0;
 	const float cellSize = 4.0;
     const float size = ledSize * cellSize;
     const float eLength = 6.0;
-    vec2 tUv = ( gl_FragCoord.xy / resolution.xy );
-    oscillator = osc( 50.0, 90.0, time, 1.0 );
+    vec2 tUv = gl_FragCoord.xy / resolution.xy;
+    vec2 coord = gl_FragCoord.xy * 2.0;
     vec2 cell = floor( ( ( gl_FragCoord.xy * 2.0 ) + 2.0 ) / size ) * size * 1.0 - resolution.xy;
     cell /= resolution.y;
-    float value = dither( gl_FragCoord.xy * 2.0, ledSize, cellSize, eLength );
+    float df = dither( coord, ledSize, cellSize, eLength );
+    float value = df;
     vec3 col = vec3( 0.0, value, 0.0 );
     vec4 color = vec4( col * col * 0.5, 1.0 );
 
     float maskDistance = transitionDist( cell, eLength );
-    if ( maskDistance > 0.01 ) {
+    if ( maskDistance > 0.0 ) {
         float value = 0.0;
-        if ( maskDistance < 0.04 ) value = ( 0.25 * dither( gl_FragCoord.xy * 2.0, ledSize, cellSize, eLength ) ) * 0.125;
-        else if ( maskDistance < 0.06 ) value = 0.0;
-        else value = dither( gl_FragCoord.xy * 2.0, ledSize, cellSize, eLength );
+        if ( maskDistance < 0.02 ) value = ( 0.25 * df ) * 0.125;
+        else if ( maskDistance < 0.05 ) value = 0.0;
+        else value = df;
         vec3 col = vec3( 0.0, value, 0.0 );
         gl_FragColor = vec4( col * 0.25, alpha );
-    } else if ( maskDistance < 0.1 ) {
-        vec2 tUv = ( ( gl_FragCoord.xy ) / resolution.xy );
+    } else {
         if ( tUv.y < 0.5 ) { tUv.y = 1.0 - tUv.y; }
         if ( tUv.x < 0.5 ) { tUv.x = 1.0 - tUv.x; }
-        gl_FragColor = vec4( getBackground( tUv, dither( gl_FragCoord.xy * 2.0, ledSize, cellSize, eLength ) ), alpha );
-
+        vec4 t = texture2D( iChannel0, tUv );
+        vec3 d = vec3( df * 0.005, df * 0.01, df * 0.005 ) * 0.02;
+        gl_FragColor = vec4( vec3( sqrt( t.rgb ) + d ), alpha );
     }
 
     gl_FragColor = sqrt( sqrt( gl_FragColor ) );

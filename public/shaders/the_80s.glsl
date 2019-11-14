@@ -431,8 +431,8 @@ float sun() {
     float divisions = 6.0;
     float divisionsShift= 0.5;
     float pattern = tri( fract( ( p.y + time / 12.0 ) * 20.0 ), 2.0 / divisions, divisionsShift ) - ( -p.y + 0.30 ) * 0.7;
-    float so = smoothstep( 0.0, -0.015, max( dist - 0.315, - pattern ) );
-    return so;
+    float so = smoothstep( 0.0, -0.015, max( dist - 0.315, - pattern ) ) - 0.2;
+    return so + 0.1;
 }
 
 float checkers() {
@@ -551,21 +551,36 @@ float getDist ( in int fx, in vec2 p, in float frac ) {
     fx = int( fract( float( fx ) * 1.61456 ) * effects );
     int temp = fx / idx;
     fx -= temp * idx;
+    vec2 absp = abs( p );
     float value = 0.0;
-         if ( fx ==  0 ) { value = 0.75 - ( ( abs( p ).x + abs( p ).y - ( min( abs( p ).x, abs( p ).y ) ) ) - ( min( abs( p ).x, abs( p ).y ) ) ); }
-    else if ( fx ==  1 ) { value = ( max( 0.8 - ( ( abs( p ).x + sin( abs( p ).y * 1.25 + time ) * 0.1 )  + ( abs( p ).y ) - min( abs( p ).x, abs( p ).y ) ), 0.0 ) ) - 0.1 ; }
-    else if ( fx ==  2 ) { value = 0.6 - ( ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) - ( ( min( abs( p ).x, abs( p ).y ) ) + sin( abs( abs( p ).y ) + time ) * 0.2 ) ); }
-    else if ( fx ==  3 ) { value = max( 0.5 - ( ( ( abs( p * rot( time ) ).x ) + abs( p * rot( time ) ).y - min( abs( p * rot( time ) ).x, abs( p * rot( time ) ).y ) ) - 0.2 - ( ( min( abs( p ).x, abs( p ).y ) ) * 0.25 ) ), 0.0) * 1.5; }
-    else if ( fx ==  4 ) { value = max( 0.9 - ( ( min( abs( p ).x, abs( p ).y ) ) + ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) ), 0.0 ); }
-    else if ( fx ==  5 ) { value = -( ( max( 0.4 - ( min( abs( p ).x, abs( p ).y ) ), 0.0 ) ) - ( max( 0.8 - ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ), 0.0 ) ) ); }
-    else if ( fx ==  6 ) { value = -( ( max( 0.25 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) - ( max( 0.8 - ( abs( wp ).x + abs( wp ).y - min( abs( p ).x, abs( p ).y ) ), 0.0 ) ) ); }
-    else if ( fx ==  7 ) { value = min(( max( 0.8 - ( abs( wp ).x + abs( p ).y - min( abs( wp ).x, abs( p ).y ) ), 0.0 ) ) * 2.0, ( max( 0.5 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) * 2.0); }
-    else if ( fx ==  8 ) { value = max( 0.7 - ( ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) - 0.5 * ( min( abs( p ).x, abs( p ).y ) ) *  ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) * 1.5 ), 0.0 ) * 1.0; }
-    else if ( fx ==  9 ) { value = max( 0.9 - ( ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) - 0.5 * ( min( abs( p ).x, abs( p ).y ) ) * -( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ) * 1.5 ), 0.0 ) * 1.0; }
-    else if ( fx == 10 ) { value = 0.8 - length( vec2( abs( p ).x * 0.8, abs( p ).y * 1.2 ) ); }
-    else if ( fx == 11 ) { value = 1.0 - length( abs( p ) * 1.2 ); }
-    else if ( fx == 12 ) { value = 0.7 - length( ( vec2( p.x * cos( 0.2 * p.y + time * 0.5 ), p.y * sin( p.y + time * 0.5 ) * 0.125 ) ) * 1.2 ); }
-    else                 { value = 0.8 - length( vec2( abs( p ).x * 0.8, abs( p ).y * 1.2 ) ) * ( abs( p ).x + abs( p ).y - min( abs( p ).x, abs( p ).y ) ); }
+    float v00 = 0.75 - ( ( absp.x + absp.y - ( min( absp.x, absp.y ) ) ) - ( min( absp.x, absp.y ) ) );
+    float v01 = ( max( 0.8 - ( ( absp.x + sin( absp.y * 1.25 + time ) * 0.1 )  + ( absp.y ) - min( absp.x, absp.y ) ), 0.0 ) ) - 0.1;
+    float v02 = 0.6 - ( ( absp.x + absp.y - min( absp.x, absp.y ) ) - ( ( min( absp.x, absp.y ) ) + sin( abs( absp.y ) + time ) * 0.2 ) );
+    float v03 = max( 0.5 - ( ( ( abs( p * rot( time ) ).x ) + abs( p * rot( time ) ).y - min( abs( p * rot( time ) ).x, abs( p * rot( time ) ).y ) ) - 0.2 - ( ( min( absp.x, absp.y ) ) * 0.25 ) ), 0.0) * 1.5;
+    float v04 = max( 0.9 - ( ( min( absp.x, absp.y ) ) + ( absp.x + absp.y - min( absp.x, absp.y ) ) ), 0.0 );
+    float v05 = -( ( max( 0.4 - ( min( absp.x, absp.y ) ), 0.0 ) ) - ( max( 0.8 - ( absp.x + absp.y - min( absp.x, absp.y ) ), 0.0 ) ) );
+    float v06 = -( ( max( 0.25 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) - ( max( 0.8 - ( abs( wp ).x + abs( wp ).y - min( absp.x, absp.y ) ), 0.0 ) ) );
+    float v07 = min(( max( 0.8 - ( abs( wp ).x + absp.y - min( abs( wp ).x, absp.y ) ), 0.0 ) ) * 2.0, ( max( 0.5 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) * 2.0);
+    float v08 = max( 0.7 - ( ( absp.x + absp.y - min( absp.x, absp.y ) ) - 0.5 * ( min( absp.x, absp.y ) ) *  ( absp.x + absp.y - min( absp.x, absp.y ) ) * 1.5 ), 0.0 ) * 1.0;
+    float v09 = max( 0.9 - ( ( absp.x + absp.y - min( absp.x, absp.y ) ) - 0.5 * ( min( absp.x, absp.y ) ) * -( absp.x + absp.y - min( absp.x, absp.y ) ) * 1.5 ), 0.0 ) * 1.0;
+    float v10 = 0.8 - length( vec2( absp.x * 0.8, absp.y * 1.2 ) );
+    float v11 = 1.0 - length( absp * 1.2 );
+    float v12 = 0.7 - length( ( vec2( p.x * cos( 0.2 * p.y + time * 0.5 ), p.y * sin( p.y + time * 0.5 ) * 0.125 ) ) * 1.2 );
+    float v13 = 0.8 - length( vec2( absp.x * 0.8, absp.y * 1.2 ) ) * ( absp.x + absp.y - min( absp.x, absp.y ) );
+         if ( fx ==  0 ) { value = v00; }
+    else if ( fx ==  1 ) { value = v01; }
+    else if ( fx ==  2 ) { value = v02; }
+    else if ( fx ==  3 ) { value = v03; }
+    else if ( fx ==  4 ) { value = v04; }
+    else if ( fx ==  5 ) { value = v05; }
+    else if ( fx ==  6 ) { value = v06; }
+    else if ( fx ==  7 ) { value = v07; }
+    else if ( fx ==  8 ) { value = v08; }
+    else if ( fx ==  9 ) { value = v09; }
+    else if ( fx == 10 ) { value = v10; }
+    else if ( fx == 11 ) { value = v11; }
+    else if ( fx == 12 ) { value = v12; }
+    else                 { value = v13; }
     return value;
 }
 
@@ -588,9 +603,6 @@ void main ( void ) {
     vec2 cell = floor( ( ( gl_FragCoord.xy * 2.0 ) + 2.0 ) / size ) * size * 1.0 - resolution.xy;
     cell /= resolution.y;
     float df = dither( coord, ledSize, cellSize, eLength );
-    float value = df;
-    vec3 col = vec3( 0.0, value, 0.0 );
-    vec4 color = vec4( col * col * 0.5, 1.0 );
 
     float maskDistance = transitionDist( cell, eLength );
     if ( maskDistance > 0.0 ) {
@@ -598,8 +610,7 @@ void main ( void ) {
         if ( maskDistance < 0.02 ) value = ( 0.25 * df ) * 0.125;
         else if ( maskDistance < 0.05 ) value = 0.0;
         else value = df;
-        vec3 col = vec3( 0.0, value, 0.0 );
-        gl_FragColor = vec4( col * 0.25, alpha );
+        gl_FragColor = vec4( vec3( value * 0.025, value, value * 0.025 ) * 0.25, alpha );
     } else {
         if ( tUv.y < 0.5 ) { tUv.y = 1.0 - tUv.y; }
         if ( tUv.x < 0.5 ) { tUv.x = 1.0 - tUv.x; }

@@ -68,7 +68,7 @@ class Background extends Component {
 
         this.init = this.init.bind( this );
 
-        this.defaultFragmentShader = '/shaders/the_80s_01.glsl';
+        this.defaultFragmentShader = '/shaders/the_80s_m.glsl';
         this.shaderMaterial = null;
 
     }
@@ -78,12 +78,12 @@ class Background extends Component {
         this.canvas = document.createElement( 'canvas' );
         this.canvasContext = this.canvas.getContext( '2d' );
 
-        this.canvas.style.width = 2048;
-        this.canvas.style.height = 2048;
-        this.canvas.style.opacity = 0.1;
+        this.canvas.style.width = 1024;
+        this.canvas.style.height = 1024;
+        this.canvas.style.opacity = 0.0;
         this.canvas.style.position = 'fixed';
-        this.canvas.width = 2048;
-        this.canvas.height = 2048;
+        this.canvas.width = 1024;
+        this.canvas.height = 1024;
 
         this.canvasTexture = new Texture( this.canvas );
         this.canvasTexture.wrapS = this.canvasTexture.wrapT = RepeatWrapping;
@@ -230,7 +230,7 @@ class Background extends Component {
             this.canvasContext.fillRect( 0, 0, this.canvas.width, this.canvas.height );
 
             this.canvasContext.lineWidth = 2;
-            this.canvasContext.strokeStyle = '#00FF00';
+            this.canvasContext.strokeStyle = '#01FF01';
             this.canvasContext.beginPath();
 
             if ( this.SIDPlayer !== null ) {
@@ -327,13 +327,13 @@ class Background extends Component {
 
             } );
 
-            this.postProcessing.setRGBShift( {
+            // this.postProcessing.setRGBShift( {
 
-                enabled: false,
-                amount: 0.000000001,
-                angle: 0.0
+            //     enabled: false,
+            //     amount: 0.000000001,
+            //     angle: 0.0
 
-            } );
+            // } );
 
             this.postProcessing.setBadVHS( {
 
@@ -342,7 +342,7 @@ class Background extends Component {
                 resolution: new Vector2( this.width, this.height ),
                 h_distort: 0.000000001,
                 v_distort: 0.000000001,
-                g_amount: 0.06,
+                g_amount: 0.05,
                 time: this.timer * 2.0,
                 mix_amount: 1.0,
                 scanlines: 'false',
@@ -423,7 +423,7 @@ class Background extends Component {
 
             );
 
-            this.postProcessing.setRGBShift( { enabled: true } );
+            this.postProcessing.setRGBShift( { enabled: false } );
             this.postProcessing.setBloomPass( { enabled: true } );
             this.postProcessing.setBadVHS( { enabled: true } );
             this.composer = this.postProcessing.composer;

@@ -346,7 +346,7 @@ class Background extends Component {
                 time: this.timer * 2.0,
                 mix_amount: 1.0,
                 scanlines: 'false',
-                offset: 0.0
+                offset: 0.1
 
             } );
 

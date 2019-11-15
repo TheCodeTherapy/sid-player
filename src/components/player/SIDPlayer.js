@@ -16,6 +16,12 @@ class jsSID {
 
     constructor( bufferLength, background_noise ) {
 
+        this.currentSong = '/SIDFiles/Double_Dragon.sid';
+        this.availableSongs = [
+            '/SIDFiles/Double_Dragon.sid',
+            '/SIDFiles/Monty_on_the_Run.sid'
+        ];
+
         this.jsSID_audioCtx = null;
         this.jsSID_scriptNode = null;
         this.outBuffer = null;
@@ -234,8 +240,8 @@ class jsSID {
 
             if ( loaded && initialized ) {
 
-                this.source.disconnect( this.analyser );
-                this.analyser.disconnect( this.jsSID_audioCtx.destination );
+                // this.analyser.disconnect( this.jsSID_audioCtx.destination );
+                // this.source.disconnect( this.analyser );
                 // this.jsSID_scriptNode.disconnect( this.jsSID_audioCtx.destination );
 
             }
@@ -1064,24 +1070,8 @@ class jsSID {
         let prevBandPass = [ 0, 0, 0 ];
         let cutoffRatio8580 = -2 * 3.14 * ( 12500 / 256 ) / sampleRate;
         let cutoffRatio6581 = -2 * 3.14 * ( 20000 / 256 ) / sampleRate;
-        let prevGate;
-        let channelAdd;
-        let ctrl;
-        let wf;
-        let test;
-        let period;
-        let step;
-        let SR;
-        let accumulatorAdd;
-        let MSB;
-        let tmp;
-        let pw;
-        let lim;
-        let waveFormOut;
-        let cutoff;
-        let resonance;
-        let filterIn;
-        let output;
+        let prevGate, channelAdd, ctrl, wf, test, period, step, SR, accumulatorAdd, MSB, tmp, pw, lim, waveFormOut;
+        let cutoff, resonance, filterIn, output;
 
         const initSID = () => {
 
@@ -1511,6 +1501,25 @@ class jsSID {
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
         ];
 
+        this.load = this.load.bind( this );
+        this.nextSong = this.nextSong.bind( this );
+
+    }
+
+    load = () => {
+
+        this.loadInit( this.currentSong, 0 );
+        this.setEndCallback( this.nextSong );
+
+    };
+
+    nextSong = () => {
+        let current = this.availableSongs.indexOf( this.currentSong );
+        let next = ( current + 1 >= this.availableSongs.length ) ? 0 : current + 1;
+        let nextFile = this.availableSongs[ next ];
+        this.currentSong = nextFile;
+        this.stop();
+        this.loadInit( this.currentSong, 0 );
     }
 
 }

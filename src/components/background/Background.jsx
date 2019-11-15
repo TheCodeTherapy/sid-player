@@ -36,7 +36,9 @@ class Background extends Component {
 
         super( props );
 
-        this.state = { playing: false };
+        this.state = {
+            playing: false,
+        };
 
         this.SIDPlayer = null;
 
@@ -70,7 +72,7 @@ class Background extends Component {
 
         this.defaultFragmentShader = '/shaders/the_80s_m.glsl';
         this.shaderMaterial = null;
-
+        
     }
 
     init() {
@@ -117,17 +119,15 @@ class Background extends Component {
         if ( this.SIDPlayer === null ) {
 
             this.SIDPlayer = new jsSID( 16384, 0.0005 );
-            this.SIDPlayer.loadInit( '/SIDFiles/Double_Dragon.sid', 0 );
+            this.SIDPlayer.load();
 
-            let playButton = document.getElementById( 'play_button');
-
+            let playButton = document.getElementById( 'play_button' );
             if ( playButton ) {
 
                 playButton.style.opacity = 0.0;
                 playButton.style.zIndex = '-100';
 
             }
-
 
         }
 

@@ -63,6 +63,7 @@ export default class PostProcessing {
         badVHS.uniforms[ 'g_amount' ].value = 0.0;
         badVHS.uniforms[ 'mix_amount' ].value = 1.0;
         badVHS.uniforms[ 'resolution' ].value = badVHSres;
+        badVHS.uniforms[ 'offset' ].value = 0.5;
 
         rgbShift.enabled = false;
         bloomPass.enabled = false;
@@ -131,6 +132,7 @@ export default class PostProcessing {
             this.badVHS.uniforms[ 'resolution' ].value = settings.resolution || this.badVHS.uniforms[ 'resolution' ].value;
             this.badVHS.uniforms[ 'scanlines' ].value = settings.scanlines || this.badVHS.uniforms[ 'scanlines' ].value;
             this.badVHS.uniforms[ 'screencurve' ].value = settings.screencurve || this.badVHS.uniforms[ 'screencurve' ].value;
+            this.badVHS.uniforms[ 'offset' ].value = settings.offset | this.badVHS.uniforms[ 'offset' ].value;
             this.badVHS.enabled = settings.enabled || this.badVHS.enabled;
 
         }

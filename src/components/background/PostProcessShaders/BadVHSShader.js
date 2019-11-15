@@ -12,6 +12,7 @@ export default {
         'glitch': { value: true },
         'scanlines': { value: true },
         'screencurve': { value: true },
+        'offset': { value: 0.5 }
     },
     vertexShader: [
         'varying vec2 vUv;',
@@ -31,6 +32,7 @@ export default {
         'uniform bool glitch;',
         'uniform bool scanlines;',
         'uniform bool screencurve;',
+        'uniform float offset;',
         'varying vec2 vUv;',
 
         'const vec3 FRACTG = vec3(95.4337, 96.4337, 97.4337);',
@@ -52,7 +54,7 @@ export default {
 
         'float stepm(float a, float b, float c) { return step(c, sin(time + a * cos(time * b))); }',
 
-        'vec3 bad_vhs (vec2 uv) {',
+        'vec3 bad_vhs (vec2 uv, in float off ) {',
         '   float tmod = mod( time * 0.25, 3.0 ), looky_mod = uv.y - tmod;',
         '   float window = 1.0 / ( 1.0 + 20.0 * looky_mod * looky_mod );',
         '   if ( glitch ) {',
@@ -65,12 +67,12 @@ export default {
         '   vec3 desat_color;',
         '   float _r, _g, _b;',
         '   float x = sin( 0.3 * time + uv.y * 21.0 ) * sin( 0.7 * time + uv.y * 29.0 ) * sin( 0.3 + 0.33 * time + uv.y * 31.0 ) * h_distort;',
-        '   _r = texture2D( tDiffuse, vec2( x + uv.x + 0.001, uv.y + 0.001 ) ).x + 0.05;',
-        '   _g = texture2D( tDiffuse, vec2( x + uv.x + 0.000, uv.y - 0.002 ) ).y + 0.05;',
-        '   _b = texture2D( tDiffuse, vec2( x + uv.x - 0.002, uv.y + 0.000 ) ).z + 0.05;',
-        '   _r += 0.08 * texture2D( tDiffuse, 0.75 * vec2( x +  0.012, -0.013 ) + vec2( uv.x + 0.001, uv.y + 0.001 ) ).x;',
-        '   _g += 0.05 * texture2D( tDiffuse, 0.75 * vec2( x + -0.011, -0.010 ) + vec2( uv.x + 0.000, uv.y - 0.002 ) ).y;',
-        '   _b += 0.08 * texture2D( tDiffuse, 0.75 * vec2( x + -0.010, -0.009 ) + vec2( uv.x - 0.002, uv.y + 0.000 ) ).z;',
+        '   _r = texture2D( tDiffuse, vec2( x + uv.x + 0.001 * off, uv.y + 0.001 * off ) ).x + 0.05;',
+        '   _g = texture2D( tDiffuse, vec2( x + uv.x + 0.000 * off, uv.y - 0.002 * off ) ).y + 0.05;',
+        '   _b = texture2D( tDiffuse, vec2( x + uv.x - 0.002 * off, uv.y + 0.000 * off ) ).z + 0.05;',
+        '   _r += 0.08 * texture2D( tDiffuse, 0.75 * vec2( x +  0.012 * off, -0.013 * off ) + vec2( uv.x + 0.001 * off, uv.y + 0.001 * off ) ).x;',
+        '   _g += 0.05 * texture2D( tDiffuse, 0.75 * vec2( x + -0.011 * off, -0.010 * off ) + vec2( uv.x + 0.000 * off, uv.y - 0.002 * off ) ).y;',
+        '   _b += 0.08 * texture2D( tDiffuse, 0.75 * vec2( x + -0.010 * off, -0.009 * off ) + vec2( uv.x - 0.002 * off, uv.y + 0.000 * off ) ).z;',
         '   float _luma = 0.3 * _r + 0.6 * _g + 0.1 * _b;',
         '   float _desat = 0.4;',
         '   desat_color = vec3(',
@@ -97,7 +99,7 @@ export default {
         '    vec4 originalColor = texture2D(tDiffuse, uv);',
         '    vec2 curveduv = (screencurve) ? curve(uv) : uv;',
         '    vec3 grain = film_grain_color();',
-        '    vec3 vhs_col = bad_vhs(curveduv) + grain * g_amount;',
+        '    vec3 vhs_col = bad_vhs(curveduv, offset) + grain * g_amount;',
         '    float vig = (0.0 + 1.0 * 16.0 * uv.x * uv.y * (1.0 - curveduv.x) * (1.0 - curveduv.y));',
         '    vhs_col *= vec3(pow(vig, 0.4));',
         '    float scans = clamp(0.35 + 0.35 * sin(3.5 * time + uv.y * resolution.y * 1.5), 0.0, 1.0);',

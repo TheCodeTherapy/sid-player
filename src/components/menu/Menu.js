@@ -37,6 +37,24 @@ const brand = () => {
 
 };
 
+const gitHub = () => {
+
+    return (
+        <a
+            href="https://github.com/mgzme/sid-player"
+            alt="Fork me on GitHub"
+            title="Star me on GitHub =)"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="main-menu nav-link"
+        >
+            <i className="menu-icon-fa fa fa-github"></i>
+            Source
+        </a>
+    );
+
+}
+
 const Menu = ( props ) => {
 
     return (
@@ -65,6 +83,7 @@ const Menu = ( props ) => {
                                 );
 
                             } )}
+                            {gitHub()}
                             <div
                                 id="toggle_fullscreen"
                                 className="main-menu nav-link toggle-fullscreen"

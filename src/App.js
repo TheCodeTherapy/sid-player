@@ -10,6 +10,7 @@ import HomePage from './components/views/homePage/HomePage';
 import ContactPage from './components/views/contactPage/ContactPage';
 
 import './icons/PeIcon7/PeIconFont.css';
+import './icons/FontAwesome/FontAwesome.css';
 
 import './App.css';
 import './css/GlobalCSS.css';
@@ -22,7 +23,6 @@ class App extends Component {
 
         this.requestFullScreen = requestFullScreen.bind( this );
         this.toggleFullScreen = toggleFullScreen.bind( this );
-
         this.queryObject = parseQuery.bind( this );
 
     }

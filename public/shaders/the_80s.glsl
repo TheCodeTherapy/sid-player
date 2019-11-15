@@ -15,7 +15,7 @@ const float ssp = 0.666666666667;
 const vec2  hashV = vec2( 12.9898, 78.233 );
 const float hashF = 43758.5453123;
 
-mat2 rot( in float a ) {
+mat2 rot ( in float a ) {
 	return mat2( cos ( a ), -sin( a ), sin( a ), cos( a ) );
 }
 
@@ -64,6 +64,21 @@ float truchet ( in vec2 p ) {
     vec2 tile = truchetPattern( fpos, hash( ipos ) );
     float a = smoothstep( tile.x - 0.2, tile.x, tile.y) - smoothstep( tile.x, tile.x + 0.2, tile.y );
     return a;
+}
+
+float truchetWave ( in vec2 p ) {
+    p.x += sin( 4.0 * p.y + time ) * 0.05;
+    p.y += sin( 3.0 * p.y + time ) * 0.10;
+    float w = clamp( ( 0.5 - -0.1 ) / 2.0 + -0.1 + sin( time * 0.5 ) * ( 0.5 - -0.1 ) * 0.5, 0.1, 0.3 );
+    p *= 8.0 + w * 20.0;
+    p *= rot( w * ( PI / 0.4 ) );
+    vec2 gv = fract( p ) - 0.5;
+    vec2 id = floor( p );
+    float n = hash( id + w * 5e-6 );
+    if ( n < 0.5 ) gv.x *= -1.0;
+    float d = abs( abs( gv.x + gv.y ) - 0.5 );
+    float mask = smoothstep( 0.01, -0.01, d - w );
+    return mask;
 }
 
 float curvedTruchet ( in vec2 p ) {
@@ -158,6 +173,18 @@ float corridor ( in vec2 p ) {
     float dist = sqrt( p.y );
     c = c * max( 0.1, min( 1.0, dist * 1.3 ) );
     return c;
+}
+
+float corridor2 ( in vec2 p ) {
+    vec3 c = vec3( 0.0 );
+	float d = abs( p.y );
+	float k = 1.0 / d;
+	p = p * k + vec2( 0.0, k );
+    p.y += time;
+	p = fract( p ) - 0.5;
+	c += sign( p.x * p.y );
+	c *= d * 8.0;
+    return c.x;
 }
 
 float rings ( in vec2 p ) {
@@ -268,13 +295,14 @@ float eye ( in vec2 uv, in float frac ) {
 	}
 }
 
-float InRect(const in vec2 vUV, const in vec4 vRect) {
-	vec2 vTestMin = step(vRect.xy, vUV.xy), vTestMax = step(vUV.xy, vRect.zw);
+float InRect ( const in vec2 vUV, const in vec4 vRect ) {
+	vec2 vTestMin = step( vRect.xy, vUV.xy );
+    vec2 vTestMax = step( vUV.xy, vRect.zw );
 	vec2 vTest = vTestMin * vTestMax;
 	return vTest.x * vTest.y;
 }
 
-float sampleDigit(const in float fDigit, const in vec2 vUV) {
+float sampleDigit ( const in float fDigit, const in vec2 vUV ) {
 	const float x0 = 0.0 / 4.0; const float x1 = 1.0 / 4.0; const float x2 = 2.0 / 4.0; const float x3 = 3.0 / 4.0;
 	const float x4 = 4.0 / 4.0; const float y0 = 0.0 / 5.0; const float y1 = 1.0 / 5.0; const float y2 = 2.0 / 5.0;
 	const float y3 = 3.0 / 5.0; const float y4 = 4.0 / 5.0; const float y5 = 5.0 / 5.0; vec4 vRect0 = vec4( 0.0 );
@@ -320,13 +348,13 @@ float clock ( in vec2 p ) {
     return value;
 }
 
-float sdCapsule( in vec3 p, in vec3 a, in vec3 b ) {
+float sdCapsule ( in vec3 p, in vec3 a, in vec3 b ) {
 	vec3 pa = p - a, ba = b - a;
-	float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
-	return length( pa - ba*h ) - 1.0;
+	float h = clamp( dot( pa, ba ) / dot( ba, ba ), 0.0, 1.0 );
+	return length( pa - ba * h ) - 1.0;
 }
 
-vec3 normal( in vec3 p, in vec3 a, in vec3 b, in vec3 e ) {
+vec3 normal ( in vec3 p, in vec3 a, in vec3 b, in vec3 e ) {
 	return normalize(
         vec3(
             sdCapsule( p + e.yxx, a, b ) - sdCapsule( p - e.yxx, a, b ),
@@ -336,13 +364,13 @@ vec3 normal( in vec3 p, in vec3 a, in vec3 b, in vec3 e ) {
     );
 }
 
-float capsuleColor( in vec3 p ) {
+float capsuleColor ( in vec3 p ) {
     if ( p.x > 0.2 ) { return 0.435; }
     else if ( p.x < -0.2 ) { return 0.65; }
     else { return 0.9; }
 }
 
-float capsule( in vec2 p ) {
+float capsule ( in vec2 p ) {
     const vec3 e = vec3(  0.0, 0.001, 0.0 );
     const vec3 a = vec3(  1.5, 0.000, 0.0 );
     const vec3 b = vec3( -1.5, 0.000, 0.0 );
@@ -375,7 +403,7 @@ float capsule( in vec2 p ) {
    	return color;
 }
 
-float strangeCell( in vec2 p ) {
+float strangeCell ( in vec2 p ) {
     p *= 1.5;
     p.x += sin(10.0 * phi * p.y + time) * phi * 0.01;
 	p.y += sin(10.0 * phi * p.x + time) * phi * 0.01;
@@ -388,45 +416,24 @@ float strangeCell( in vec2 p ) {
     return l;
 }
 
-float weirdCircle() {
+float weirdCircle ( in vec2 p ) {
     vec2 r = resolution, o = gl_FragCoord.xy - r / 2.0;
-    o = vec2(length(o) / r.y - .2, atan(o.y,o.x));
-    vec4 s = 0.08*cos(1.5*vec4(0,1,2,3) + time + o.y + sin(o.y) * cos(time)), e = s.yzwx, f = max(o.x-s,e-o.x);
-    vec4 c = dot(clamp(f*r.y,0.,1.), 72.*(s-e)) * (s-.1) + f;
+    o = vec2( length( o ) / r.y - 0.2, atan( p.y, p.x ) );
+    vec4 c4 = vec4( 0.0, 1.0, 2.0, 3.0 );
+    vec4 s = 0.08 * cos( 1.5 * c4 + time + o.y + sin( o.y ) * cos( time ) );
+    vec4 e = s.yzwx;
+    vec4 f = max( o.x - s, e - o.x );
+    vec4 c = dot( clamp( f * r.y, 0.0, 1.0 ), 72.0 * ( s - e ) ) * ( s - 0.09 ) + f;
     float cf = sqrt( c.x + c.y + c.z ) / 1.3;
     return 2.0 - inversesqrt( cf * cf * 0.5 );
 }
 
-float spiralWaves() {
-    float t = time * 0.5;
-    vec2 u = gl_FragCoord.xy;
-	vec2 V = gl_FragCoord.xy;
-	vec2 U = 6.0 * u / resolution.y;
-	U.x -= t;
-	V = floor(U);
-	float s = sign(mod(U.y,2.)-1.);
-    U.y = dot(cos(2.*(t+V.x) * 1.5 * max(0.,.5-length(U = fract(U)-.5)) - vec2(99.,0) ), U);
-	return smoothstep(-1.,10.0, s*U / 0.017 ).y;
-}
-
-float diamondWaves( in vec2 p ) {
-    p.x /= max(resolution.x, resolution.y) / min(resolution.x, resolution.y) - 0.75;
-    p = floor(256.0*p)/512.0;
-	vec2 pc = 16.0*vec2(length(p),length(p*p));
-	float tt = -time*2.0;
-	float c = 0.7 * smoothstep(0.0, 0.5, sin((pc.x-pc.y)*8.+tt*1.00)*3.0+2.0-pc.y);
-	float d = 0.5 * smoothstep(0.0, 0.5, sin((pc.x-pc.y)*8.+tt*1.25)*3.0+2.0-pc.y);
-	float e = 0.5 * smoothstep(0.0, 0.5, sin((pc.x-pc.y)*8.+tt*1.50)*3.0+2.0-pc.y);
-    return c + d * e + c * e;
-}
-
-float tri( in float t, in float scale, in float shift) {
+float tri ( in float t, in float scale, in float shift) {
 	return ( abs( t * 2.0 - 1.0 ) - shift ) * ( scale );
 }
 
-float sun() {
-    vec2 R = resolution.xy;
-    vec2 p = (gl_FragCoord.xy - 0.5 * R) / R.y + 0.5;
+float sun ( in vec2 p ) {
+    p = p * 0.42 + 0.5;
     float dist = length( p - vec2( 0.5 + sin(time) * 0.0025, 0.5 + cos(time) * 0.0025 ) );
     float divisions = 6.0;
     float divisionsShift= 0.5;
@@ -435,9 +442,9 @@ float sun() {
     return so + 0.1;
 }
 
-float checkers() {
+float checkers ( in vec2 p ) {
+    p = p * 0.5 + 0.5;
     vec2 R = resolution.xy;
-    vec2 p = vec2( gl_FragCoord.xy - 0.5 * R.xy ) / R.y;
     float t = time * 0.75;
     vec3 col = vec3( 1.0 );
     float sc = 10.0;
@@ -452,7 +459,7 @@ float checkers() {
     return sqrt( col.x + ( 1.0 - col.x ) * 0.5 );
 }
 
-float map( in vec3 p ) {
+float map ( in vec3 p ) {
 	p.xz *= rot( time * PI / 5.5 );
 	p.xy *= rot( time * PI / 5.5 );
 	vec3 q = abs( p );
@@ -460,7 +467,7 @@ float map( in vec3 p ) {
 	return c;
 }
 
-vec3 trace( in vec3 o, in vec3 r ) {
+vec3 trace ( in vec3 o, in vec3 r ) {
 	vec4 d;
 	float t = 0.;
 	for( int i = 0; i < 36; i++ ) {
@@ -472,31 +479,31 @@ vec3 trace( in vec3 o, in vec3 r ) {
 	return vec3( p * -0.6 + t * 0.2 );
 }
 
-float traceCube() {
-	vec2 uv = ( gl_FragCoord.xy * 2.- resolution.xy) / resolution.y;
+float traceCube ( in vec2 p ) {
+    p *= 1.2;
 	vec3 o = vec3( 0.0, 0.0, -1.8 );
-	vec3 r = normalize( vec3( uv, 1.5 ) );
+	vec3 r = normalize( vec3( p, 1.5 ) );
 	vec3 d = trace( o, r );
     return dot( r, d.xyz ) * 1.1;
 }
 
 float getEffect ( in int fx, in vec2 uv, in float frac ) {
-    float effects = 26.0;
+    float effects = 27.0;
     int idx = int( effects ) - 1;
-    fx = int( fract( float( fx ) * 1.61456 ) * effects );
+    fx = int( fract( float( fx ) * phi ) * effects );
     int temp = fx / idx;
     fx -= temp * idx;
     float value = 0.0;
-         if ( fx ==  0 ) value = waves( uv, frac );
-    else if ( fx ==  1 ) value = grid( uv );
-    else if ( fx ==  2 ) value = curvedTruchet( uv );
-    else if ( fx ==  3 ) value = pacman( uv, frac );
-    else if ( fx ==  4 ) value = clock( uv );
-    else if ( fx ==  5 ) value = truchet( uv );
-    else if ( fx ==  6 ) value = plasma( uv );
-    else if ( fx ==  7 ) value = eye( uv, frac );
-    else if ( fx ==  8 ) value = capsule( uv );
-    else if ( fx ==  9 ) value = squares( uv );
+         if ( fx == 0  ) value = waves( uv, frac );
+    else if ( fx == 1  ) value = grid( uv );
+    else if ( fx == 2  ) value = curvedTruchet( uv );
+    else if ( fx == 3  ) value = pacman( uv, frac );
+    else if ( fx == 4  ) value = clock( uv );
+    else if ( fx == 5  ) value = truchet( uv );
+    else if ( fx == 6  ) value = plasma( uv );
+    else if ( fx == 7  ) value = eye( uv, frac );
+    else if ( fx == 8  ) value = capsule( uv );
+    else if ( fx == 9  ) value = squares( uv );
     else if ( fx == 10 ) value = stars( uv );
     else if ( fx == 11 ) value = spiral( uv );
     else if ( fx == 12 ) value = pong( uv );
@@ -505,12 +512,12 @@ float getEffect ( in int fx, in vec2 uv, in float frac ) {
     else if ( fx == 15 ) value = wave( uv );
     else if ( fx == 16 ) value = flippingSquares( uv );
     else if ( fx == 17 ) value = strangeCell( uv );
-    else if ( fx == 18 ) value = weirdCircle();
-    else if ( fx == 19 ) value = spiralWaves();
-    else if ( fx == 20 ) value = diamondWaves( uv );
-    else if ( fx == 21 ) value = sun();
-    else if ( fx == 22 ) value = checkers();
-    else if ( fx == 23 ) value = traceCube();
+    else if ( fx == 18 ) value = weirdCircle( uv );
+    else if ( fx == 19 ) value = sun( uv );
+    else if ( fx == 20 ) value = checkers( uv );
+    else if ( fx == 21 ) value = traceCube( uv );
+    else if ( fx == 22 ) value = truchetWave( uv );
+    else if ( fx == 23 ) value = corridor2( uv );
     else                 value = plasma( uv );
    	return value;
 }
@@ -545,42 +552,29 @@ float dither ( in vec2 frag, in float ledSize, in float cellSize, in float eLeng
 
 
 float getDist ( in int fx, in vec2 p, in float frac ) {
-    vec2 wp = vec2( p.x + sin( 4.0 * p.y + time * 2.0 ) * 0.05, p.y + cos( 2.0 * p.x + time ) * 0.05 );
-    float effects = 13.0;
+    vec2 wp = vec2( p.x + sin( 4.0 * p.y + time * 2.0 ) * 0.025, p.y + cos( 2.0 * p.x + time ) * 0.025 );
+    float effects = 14.0;
     int idx = int( effects ) - 1;
-    fx = int( fract( float( fx ) * 1.61456 ) * effects );
+    fx = int( fract( float( fx ) * phi ) * effects );
     int temp = fx / idx;
     fx -= temp * idx;
     vec2 absp = abs( p );
+    vec2 abswp = abs( wp );
     float value = 0.0;
-    float v00 = 0.75 - ( ( absp.x + absp.y - ( min( absp.x, absp.y ) ) ) - ( min( absp.x, absp.y ) ) );
-    float v01 = ( max( 0.8 - ( ( absp.x + sin( absp.y * 1.25 + time ) * 0.1 )  + ( absp.y ) - min( absp.x, absp.y ) ), 0.0 ) ) - 0.1;
-    float v02 = 0.6 - ( ( absp.x + absp.y - min( absp.x, absp.y ) ) - ( ( min( absp.x, absp.y ) ) + sin( abs( absp.y ) + time ) * 0.2 ) );
-    float v03 = max( 0.5 - ( ( ( abs( p * rot( time ) ).x ) + abs( p * rot( time ) ).y - min( abs( p * rot( time ) ).x, abs( p * rot( time ) ).y ) ) - 0.2 - ( ( min( absp.x, absp.y ) ) * 0.25 ) ), 0.0) * 1.5;
-    float v04 = max( 0.9 - ( ( min( absp.x, absp.y ) ) + ( absp.x + absp.y - min( absp.x, absp.y ) ) ), 0.0 );
-    float v05 = -( ( max( 0.4 - ( min( absp.x, absp.y ) ), 0.0 ) ) - ( max( 0.8 - ( absp.x + absp.y - min( absp.x, absp.y ) ), 0.0 ) ) );
-    float v06 = -( ( max( 0.25 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) - ( max( 0.8 - ( abs( wp ).x + abs( wp ).y - min( absp.x, absp.y ) ), 0.0 ) ) );
-    float v07 = min(( max( 0.8 - ( abs( wp ).x + absp.y - min( abs( wp ).x, absp.y ) ), 0.0 ) ) * 2.0, ( max( 0.5 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) * 2.0);
-    float v08 = max( 0.7 - ( ( absp.x + absp.y - min( absp.x, absp.y ) ) - 0.5 * ( min( absp.x, absp.y ) ) *  ( absp.x + absp.y - min( absp.x, absp.y ) ) * 1.5 ), 0.0 ) * 1.0;
-    float v09 = max( 0.9 - ( ( absp.x + absp.y - min( absp.x, absp.y ) ) - 0.5 * ( min( absp.x, absp.y ) ) * -( absp.x + absp.y - min( absp.x, absp.y ) ) * 1.5 ), 0.0 ) * 1.0;
-    float v10 = 0.8 - length( vec2( absp.x * 0.8, absp.y * 1.2 ) );
-    float v11 = 1.0 - length( absp * 1.2 );
-    float v12 = 0.7 - length( ( vec2( p.x * cos( 0.2 * p.y + time * 0.5 ), p.y * sin( p.y + time * 0.5 ) * 0.125 ) ) * 1.2 );
-    float v13 = 0.8 - length( vec2( absp.x * 0.8, absp.y * 1.2 ) ) * ( absp.x + absp.y - min( absp.x, absp.y ) );
-         if ( fx ==  0 ) { value = v00; }
-    else if ( fx ==  1 ) { value = v01; }
-    else if ( fx ==  2 ) { value = v02; }
-    else if ( fx ==  3 ) { value = v03; }
-    else if ( fx ==  4 ) { value = v04; }
-    else if ( fx ==  5 ) { value = v05; }
-    else if ( fx ==  6 ) { value = v06; }
-    else if ( fx ==  7 ) { value = v07; }
-    else if ( fx ==  8 ) { value = v08; }
-    else if ( fx ==  9 ) { value = v09; }
-    else if ( fx == 10 ) { value = v10; }
-    else if ( fx == 11 ) { value = v11; }
-    else if ( fx == 12 ) { value = v12; }
-    else                 { value = v13; }
+         if ( fx ==  0 ) { value = 0.75 - ( ( absp.x + absp.y - ( min( absp.x, absp.y ) ) ) - ( min( absp.x, absp.y ) ) ); }
+    else if ( fx ==  1 ) { value = ( max( 0.85 - ( ( absp.x + sin( absp.y * 1.25 + time ) * 0.125 )  + ( absp.y ) - min( absp.x, absp.y ) ), 0.0 ) ) - 0.1; }
+    else if ( fx ==  2 ) { value = 0.8 - ( ( absp.x + ( abs( wp ).y ) - min( absp.x, ( abs( wp ).y ) ) ) - ( ( min( absp.x, ( abs( wp ).y ) ) ) + sin( ( abs( wp ).y ) + time ) * 0.2 ) ); }
+    else if ( fx ==  3 ) { value = max( 0.5 - ( ( ( abs( p * rot( time ) ).x ) + abs( p * rot( time ) ).y - min( abs( p * rot( time ) ).x, abs( p * rot( time ) ).y ) ) - 0.2 - ( ( min( absp.x, absp.y ) ) * 0.25 ) ), 0.0) * 1.5; }
+    else if ( fx ==  4 ) { value = max( 1.0 - ( ( min( abswp.x, abswp.y ) ) + ( abswp.x + abswp.y - min( abswp.x, abswp.y ) ) ), 0.0 ); }
+    else if ( fx ==  5 ) { value = -( ( max( 0.4 - ( min( absp.x, absp.y ) ), 0.0 ) ) - ( max( 0.8 - ( absp.x + absp.y - min( absp.x, absp.y ) ), 0.0 ) ) ); }
+    else if ( fx ==  6 ) { value = -( ( max( 0.25 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) - ( max( 0.8 - ( abs( wp ).x + abs( wp ).y - min( absp.x, absp.y ) ), 0.0 ) ) ); }
+    else if ( fx ==  7 ) { value = min(( max( 0.8 - ( abs( wp ).x + absp.y - min( abs( wp ).x, absp.y ) ), 0.0 ) ) * 2.0, ( max( 0.5 - ( min( abs( wp ).x, abs( wp ).y ) ), 0.0 ) ) * 2.0); }
+    else if ( fx ==  8 ) { value = max( 0.7 - ( ( absp.x + absp.y - min( absp.x, absp.y ) ) - 0.5 * ( min( absp.x, absp.y ) ) *  ( absp.x + absp.y - min( absp.x, absp.y ) ) * 1.5 ), 0.0 ) * 1.0; }
+    else if ( fx ==  9 ) { value = max( 0.9 - ( ( absp.x + absp.y - min( absp.x, absp.y ) ) - 0.5 * ( min( absp.x, absp.y ) ) * -( absp.x + absp.y - min( absp.x, absp.y ) ) * 1.5 ), 0.0 ) * 1.0; }
+    else if ( fx == 10 ) { value = 1.0 - length( vec2( wp.x * 1.0 - sin( time ) * 0.125, ( abs( wp.y * 1.0 - cos( time ) * 0.1 ) ) * 1.2 ) ); }
+    else if ( fx == 11 ) { value = 1.0 - length( abs( wp ) * 1.2 ); }
+    else if ( fx == 12 ) { value = 0.7 - length( ( vec2( p.x * cos( 0.2 * p.y + time * 0.5 ), p.y * sin( p.y + time * 0.5 ) * 0.125 ) ) * 1.2 ); }
+    else                 { value = 0.8 - length( vec2( absp.x * 0.8, absp.y * 1.2 ) ) * ( absp.x + absp.y - min( absp.x, absp.y ) ); }
     return value;
 }
 

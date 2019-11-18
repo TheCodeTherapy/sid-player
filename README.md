@@ -6,7 +6,9 @@ SID Player aims to be a SID-file music audio visualizer for the browser. It is a
 
 In a few days a dropdown list with all server-served sid files will be available, as much as functions like `next`, `previous`, `random`, `play`, `pause` (and other basic player functionalities like volume control), `file-info` and `file-upload` (so you can listen to your local sid files on your browser).
 
-New audio-reactive background shaders and waveform visualizer's styles will be also available and seamlessly browsable ( like the background shaders you can see at my personal website [https://mgz.me](https://mgz.me) ).
+New audio-reactive background shaders and waveform visualizer's styles will be also available and seamlessly switcheable.
+
+You can check my other WebGL Projects at my personal website [https://mgz.me](https://mgz.me) ).
 
 **THIS PROJECT IS A WIP. Please expect it to have a lot of room for improvements for now.**
 
